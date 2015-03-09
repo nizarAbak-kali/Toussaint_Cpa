@@ -57,8 +57,40 @@ public class DefaultTeam {
         return new Line(ptmp1, ptmp2);
 
     }
-
-
+  //TRI PAR PIXEL POUR GRAHAM
+  	// on trie les point 
+    public ArrayList<Point> filtreParPixel(ArrayList<Point> points){
+		ArrayList<Point> res = new ArrayList<Point>();
+		ArrayList<Point> copie = new ArrayList<Point>();
+		copie = (ArrayList<Point>) points.clone();
+		 int ordmax , ordmin ,ordmoy;
+		 ordmax = 0 ;
+		 ordmin = points.get(0).y;
+		 
+		 
+		 for(Point p :points){
+			 if(ordmax < p.y)
+				 ordmax = p.y;
+			 if(ordmin > p.y)
+				 ordmin = p.y;
+		 }
+		ordmoy = (ordmax+ordmin)/2 ;
+		
+		ArrayList<Point> petit = new ArrayList<Point>();
+		ArrayList<Point> grand = new ArrayList<Point>();
+		
+		for(Point p : points){
+			if(p.y<= ordmoy)
+				petit.add(p);
+			else {
+				grand.add(p);
+			}	
+		}
+		// on trie les deux sous listes 
+		  
+		
+		return res ;
+	}
     //SHAMOS VRAI
     // calculDiametreOptimise: ArrayList<Point> --> Line
     //   renvoie une pair de points de la liste, de distance maximum.
