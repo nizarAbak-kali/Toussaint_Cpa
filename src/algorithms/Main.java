@@ -17,7 +17,7 @@ public class Main {
     private static String title = "Diameter Racer";
     private static String filename = "input.points";
     private static FramedDiamRace framedGUI;
-    private static int nbPoints = 10000;
+    private static int nbPoints = 100;
 
 
     public static void main(String[] args) {

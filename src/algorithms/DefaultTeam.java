@@ -9,88 +9,80 @@ import java.util.Random;
 
 
 public class DefaultTeam {
+
     //TRI PAR PIXEL POUR GRAHAM
     // on trie les point
-    public Line filtrealacon(ArrayList<Point> points) {
-        //contient les points dans l'orde croissant de leurs abscisses
-        ArrayList<Point> bucket_abc = new ArrayList<Point>();
-        //contient les points dans l'orde croissant de leurs abscisses
-        ArrayList<Point> bucket_ord = new ArrayList<Point>();
-        ArrayList<Point> inter = new ArrayList<Point>();
+    public ArrayList<Point> filtreParPixel1(ArrayList<Point> points) {
 
+        ArrayList<Point> res = new ArrayList<Point>();
+        ArrayList<Point> copie = new ArrayList<Point>();
+        copie = (ArrayList<Point>) points.clone();
+        int ordmax, ordmin, ordmoy;
+        ordmax = 0;
+        ordmin = points.get(0).y;
 
-        //on remplit les array avant de les trier
-        for (Point i : points) {
-            bucket_abc.add(i);
-            bucket_ord.add(i);
-
-        }
-
-        Point center = points.get(0);
-        int radius = 100;
-
-        /*******************
-         * PARTIE A ECRIRE *
-         *******************/
-        Point ptmp1 = new Point();
-        Point ptmp2 = new Point();
-        int distmax, tmp;
-        distmax = 0;
-        tmp = 0;
 
         for (Point p : points) {
-            for (Point q : points) {
-                if (p.equals(q)) continue;
-                tmp = (int) (p.distance(q) + 0.5);
-                if (distmax < tmp) {
-                    distmax = tmp;
-                    ptmp1.x = p.x;
-                    ptmp1.y = p.y;
-                    ptmp2.x = q.x;
-                    ptmp2.y = q.y;
+            if (ordmax < p.y)
+                ordmax = p.y;
+            if (ordmin > p.y)
+                ordmin = p.y;
+        }
+        ordmoy = (ordmax + ordmin) / 2;
 
-                }
+        ArrayList<Point> petit = new ArrayList<Point>();
+        ArrayList<Point> grand = new ArrayList<Point>();
+
+        for (Point p : points) {
+            if (p.y <= ordmoy)
+                petit.add(p);
+            else {
+                grand.add(p);
             }
         }
+        // on trie les deux sous listes
 
 
-        return new Line(ptmp1, ptmp2);
-
+        return res;
     }
-  //TRI PAR PIXEL POUR GRAHAM
-  	// on trie les point 
-    public ArrayList<Point> filtreParPixel(ArrayList<Point> points){
-		ArrayList<Point> res = new ArrayList<Point>();
-		ArrayList<Point> copie = new ArrayList<Point>();
-		copie = (ArrayList<Point>) points.clone();
-		 int ordmax , ordmin ,ordmoy;
-		 ordmax = 0 ;
-		 ordmin = points.get(0).y;
-		 
-		 
-		 for(Point p :points){
-			 if(ordmax < p.y)
-				 ordmax = p.y;
-			 if(ordmin > p.y)
-				 ordmin = p.y;
-		 }
-		ordmoy = (ordmax+ordmin)/2 ;
-		
-		ArrayList<Point> petit = new ArrayList<Point>();
-		ArrayList<Point> grand = new ArrayList<Point>();
-		
-		for(Point p : points){
-			if(p.y<= ordmoy)
-				petit.add(p);
-			else {
-				grand.add(p);
-			}	
-		}
-		// on trie les deux sous listes 
-		  
-		
-		return res ;
-	}
+
+    //TRI PAR PIXEL POUR GRAHAM
+    // on trie les point
+    public ArrayList<Point> filtreParPixel(ArrayList<Point> points) {
+        ArrayList<Point> res = new ArrayList<Point>();
+        Point ymin[];
+        Point ymax[];
+
+        ymax = new Point[1024];
+        ymin = new Point[1024];
+        System.out.println("on est dans la le filtre");
+        // on met les tableaux a null
+        for (int i = 0; i < ymin.length; i++) {
+            ymax[i] = null;
+            ymin[i] = null;
+        }
+        System.out.println("boucle 1 fini");
+        for (Point p : points) {
+            if ((ymin[p.x] == null) || (ymin[p.x].y < p.y))
+                ymin[p.x] = p;
+        }
+        System.out.println("boucle 2 fini");
+        for (Point p : points) {
+            if ((ymax[p.x] == null) || (ymax[p.x].y < p.y))
+                ymax[p.x] = p;
+        }
+        System.out.println("boucle 3 fini");
+        for (int i = 0; i < ymin.length; i++) {
+            if (ymax[i] != null)
+                res.add(ymax[i]);
+            if (ymin[i] != null)
+                res.add(ymin[i]);
+        }
+        System.out.println("boucle 4 fini");
+        return res;
+    }
+
+
     //SHAMOS VRAI
     // calculDiametreOptimise: ArrayList<Point> --> Line
     //   renvoie une pair de points de la liste, de distance maximum.
@@ -121,6 +113,9 @@ public class DefaultTeam {
         if (points.isEmpty()) {
             return null;
         }
+
+        points = filtreParPixel(points);
+
 
         Point center = points.get(0);
         int radius = 100;
@@ -189,6 +184,10 @@ public class DefaultTeam {
         if (points.isEmpty()) {
             return null;
         }
+        System.out.println("nb point avant le filtre : " + points.size());
+        //points= filtreParPixel(points);
+
+        System.out.println("nb point avant le filtre : " + points.size());
         Point P = null, Q = null;
         // 1- Choisir un point dummy appartenant a Points
         Point dummy = points.get(0);
@@ -260,6 +259,49 @@ public class DefaultTeam {
 
 
     /***************************************************************************/
+    public ArrayList<Point> toussaint(ArrayList<Point> points) {
+        ArrayList<Point> box = new ArrayList<Point>();
+        box.add(points.get(0));
+        box.add(points.get(1));
+        box.add(points.get(2));
+        box.add(points.get(3));
+        return box;
+    }
+
+    public int airePolygone(ArrayList<Point> points) {
+        double aire, tmp1, tmp2;
+        int x, y;
+        int j;
+        tmp1 = 0.0;
+        tmp2 = 0.0;
+        aire = 0.0;
+        for (int i = 0; i < points.size(); i++) {
+            j = i + 1;
+            if (i == points.size() - 1)
+                j = 1;
+            tmp1 += points.get(i).getX() * points.get(j).getY();
+
+        }
+        for (int i = 0; i < points.size(); i++) {
+            j = i + 1;
+            if (i == points.size() - 1)
+                j = 1;
+            tmp2 += points.get(i).getY() * points.get(j).getX();
+        }
+        aire = (tmp1 - tmp2) / 2;
+        return (int) aire;
+    }
+
+    public int aireCercle(Circle c) {
+        double aire = 0;
+        aire = 2 * StrictMath.PI * (c.getRadius()) * (c.getRadius());
+        return (int) aire;
+    }
+
+    public void testQualite(ArrayList<Point> points) {
+
+    }
+
 
 
 }
