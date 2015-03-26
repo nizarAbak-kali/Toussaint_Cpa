@@ -5,6 +5,8 @@ import supportGUI.Line;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Random;
 
 
@@ -48,7 +50,7 @@ public class DefaultTeam {
 
     //TRI PAR PIXEL POUR GRAHAM
     // on trie les point
-    public ArrayList<Point> filtreParPixel(ArrayList<Point> points) {
+    public ArrayList<Point> filtreParPixel2(ArrayList<Point> points) {
         ArrayList<Point> res = new ArrayList<Point>();
         Point ymin[];
         Point ymax[];
@@ -90,20 +92,77 @@ public class DefaultTeam {
         if (points.size() < 3) {
             return null;
         }
-        Point a = points.get(0);
-        Point b = points.get(1);
-
+        Line line;
+        Point pp, pq, pp0, pq0;
+        pp = new Point();
+        pq = new Point();
+        pp0 = new Point();
+        pq0 = new Point();
         //calculer le point p de  dist max de la droite (ab)
+        int p = 0;
+        int p0 = points.size() - 1;
+        int q = p + 1;
+        ArrayList<Point> airetmp1, airetmp2;
+        airetmp1 = new ArrayList<Point>();
+        airetmp2 = new ArrayList<Point>();
+        //Area p next p ,next q
+        airetmp1.add(points.get(p));
+        airetmp1.add(points.get(p + 1));
+        airetmp1.add(points.get(q + 1));
+        //Area p next p , q
+        airetmp1.add(points.get(p));
+        airetmp1.add(points.get(p + 1));
+        airetmp1.add(points.get(q));
+        int q0;
+        while (airePolygone(airetmp1) > airePolygone(airetmp2)) {
+            q += 1;
+            q0 = q;
+            while (q != p0) {
+                p += 1;
+                System.out.println(" p " + p + " || " + q + "  q ");
 
-        Point p = points.get(0);
-        for (Point tmp : points) {
+                airetmp1.clear();
+                airetmp2.clear();
+                //Area p next p ,next q
+                airetmp1.add(points.get(p));
+                airetmp1.add(points.get(p + 1));
+                airetmp1.add(points.get(q + 1));
+                //Area p next p , q
+                airetmp1.add(points.get(p));
+                airetmp1.add(points.get(p + 1));
+                airetmp1.add(points.get(q));
+                while (airePolygone(airetmp1) > airePolygone(airetmp2)) {
+                    q += 1;
+
+                    if (p != q0 && q != p0) {
+                        System.out.println(" p " + p + " || " + q + "  q ");
+                        line = new Line(points.get(p), points.get(q));
+                    } else {
+                        return new Line(points.get(p), points.get(q));
+                    }
+                }
+                airetmp1.clear();
+                airetmp2.clear();
+                //Area p next p ,next q
+                airetmp1.add(points.get(p));
+                airetmp1.add(points.get(p + 1));
+                airetmp1.add(points.get(q + 1));
+                //Area p next p , q
+                airetmp1.add(points.get(p));
+                airetmp1.add(points.get(p + 1));
+                airetmp1.add(points.get(q));
+
+                if (airePolygone(airetmp1) == airePolygone(airetmp2)) {
+                    if (p != q0 && q != p0) {
+                        System.out.println(" p " + p + " || " + q + "  q ");
+                    } else {
+                        System.out.println(" p " + p + " || " + q + "  q ");
+                    }
+                }
+            }
 
         }
-
-        /*******************
-         * PARTIE A ECRIRE *
-         *******************/
-        return new Line(a, b);
+        return new Line(points.get(p), points.get(q));
     }
 
     // calculCercleMin: ArrayList<Point> --> Circle
@@ -113,10 +172,6 @@ public class DefaultTeam {
         if (points.isEmpty()) {
             return null;
         }
-
-        points = filtreParPixel(points);
-
-
         Point center = points.get(0);
         int radius = 100;
 
@@ -158,24 +213,67 @@ public class DefaultTeam {
         if (points.size() < 3) {
             return null;
         }
-
         ArrayList<Point> enveloppe = new ArrayList<Point>();
-
-        enveloppe.add(points.get(0));
-        enveloppe.add(points.get(1));
-        enveloppe.add(points.get(2));
+        ArrayList<Point> minY = new ArrayList<Point>();
+        ArrayList<Point> sortPoints = new ArrayList<Point>();
 
 
-        /*******************
-         * PARTIE A ECRIRE *
-         *******************/
+        //extraire ceux d'ordonnee minimum de points
+        int min = 100000;
+        int indiceMin = 0;
+        int moitie = points.size() / 2;
+        for (int i = 0; i < moitie; i++) {
+            min = 100000;
+            for (int j = 0; j < points.size(); j++) {
+                if (points.get(j).y < min) {
+                    min = points.get(j).y;
+                    indiceMin = j;
+                }
+            }
+            minY.add(points.get(indiceMin));
+            points.remove(indiceMin);
+        }
 
+        //il reste dans points ceux dordonnee maximum
 
-        //return points;
+        //tri croissant sur les x dans les ordonnee minimum
+        Collections.sort(minY, new Comparator<Point>() {
+
+            public int compare(Point o1, Point o2) {
+                return Integer.compare(o1.x, o2.x);
+            }
+        });
+        //tri croissant sur les x dans les ordonnee maximum (seront inverser lors de la fusion)
+        Collections.sort(points, new Comparator<Point>() {
+
+            public int compare(Point o1, Point o2) {
+                return Integer.compare(o1.x, o2.x);
+            }
+        });
+        //fusion
+        for (int k = 0; k < minY.size(); k++) sortPoints.add(minY.get(k));
+        for (int l = points.size() - 1; l >= 0; l--) sortPoints.add(points.get(l));
+        minY.clear();
+        points.clear();
+        //fin du tri par pixel
+        //supprimer les points au milieu de segment qui tourne a droite
+        enveloppe.add(sortPoints.get(0));
+        enveloppe.add(sortPoints.get(1));
+        for (int s = 2; s < sortPoints.size(); s++) {
+            while (enveloppe.size() >= 2 ? (produitVectoriel(enveloppe.get(enveloppe.size() - 2), enveloppe.get(enveloppe.size() - 1), sortPoints.get(s)) <= 0) : enveloppe.get(enveloppe.size() - 1) == sortPoints.get(s)) {
+                enveloppe.remove(enveloppe.size() - 1);
+            }
+            enveloppe.add(sortPoints.get(s));
+        }
+        //points.addAll(sortPoints);
+        sortPoints.clear();
+        //fin
         return enveloppe;
     }
 
-
+    public double produitVectoriel(Point p1, Point p2, Point p3) {
+        return (p2.x - p1.x) * (p3.y - p1.y) - (p3.x - p1.x) * (p2.y - p1.y);
+    }
     /**
      * *****************************     PROJET CPA    ******************************************
      */
@@ -257,15 +355,46 @@ public class DefaultTeam {
         return ctemp;
     }
 
+    public Point westPoint(ArrayList<Point> env) {
+        Point res = env.get(0);
+        for (Point p : env) {
+            if (p.getX() < res.getX()) {
+                res = p;
+            }
+        }
+        return res;
+    }
 
+    public Point estPoint(ArrayList<Point> env) {
+        Point res = env.get(0);
+        for (Point p : env) {
+            if (p.getX() > res.getX()) {
+                res = p;
+            }
+        }
+        return res;
+    }
     /***************************************************************************/
     public ArrayList<Point> toussaint(ArrayList<Point> points) {
-        ArrayList<Point> box = new ArrayList<Point>();
-        box.add(points.get(0));
-        box.add(points.get(1));
-        box.add(points.get(2));
-        box.add(points.get(3));
-        return box;
+        ArrayList<Point> box, env;
+        Point west, est;
+        Droite left, right;
+
+
+        env = enveloppeConvexe(points);
+
+        // les point ouest et est
+        west = westPoint(env);
+        est = estPoint(env);
+
+        // left la droite verticale  qui passe par west
+        left = new Droite(0.0, west.getX());
+
+        // right la droite parralle a left qui passe par est
+        right = new Droite(left.coeff, est.getX());
+
+
+        return new ArrayList<Point>();
     }
 
     public int airePolygone(ArrayList<Point> points) {
@@ -299,7 +428,7 @@ public class DefaultTeam {
     }
 
     public void testQualite(ArrayList<Point> points) {
-
+        // aire du rectangle /aire du convex -100%
     }
 
 
